@@ -28,7 +28,7 @@ version: '3.3'
 
 services:
   scanner:
-    image: ihor-chaban/tgtg-scanner:latest-alpine
+    image: gorus5/tgtg-scanner:latest-alpine
 
     environment:
     - TGTG_USERNAME=
