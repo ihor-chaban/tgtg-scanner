@@ -1,10 +1,9 @@
 # TGTG Scanner
 
 [![Tests](https://github.com/ihor-chaban/tgtg-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/ihor-chaban/tgtg-scanner/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/github/ihor-chaban/tgtg-scanner/branch/main/graph/badge.svg?token=POHW9USW7C)](https://codecov.io/github/ihor-chaban/tgtg-scanner)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ihor-chaban/tgtg/release.yml)](https://github.com/ihor-chaban/tgtg-scanner/actions/workflows/release.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ihor-chaban/tgtg-scanner/release.yml)](https://github.com/ihor-chaban/tgtg-scanner/actions/workflows/release.yml)
 [![GitHub release](https://img.shields.io/github/release/ihor-chaban/tgtg-scanner?include_prereleases=&sort=semver&color=blue)](https://github.com/ihor-chaban/tgtg-scanner/releases/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/ihor-chaban/tgtg-scanner)](https://hub.docker.com/r/gorus5/tgtg-scanner)
+[![Docker Pulls](https://img.shields.io/docker/pulls/gorus5/tgtg-scanner)](https://hub.docker.com/r/gorus5/tgtg-scanner)
 
 TGTG Scanner observes your favorite TGTG Magic Bags for newly available items and notifies you
 via mail, IFTTT, Ntfy, Telegram, PushSafer, Apprise or any other WebHook.
