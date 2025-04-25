@@ -7,6 +7,10 @@ on:
     tags:
     - v[0-9]+.[0-9]+.[0-9]+*
   pull_request:
+    branches:
+    - main
+    types:
+    - closed
 
 env:
   PYTHON_VERSION: '3.11'
@@ -20,7 +24,7 @@ jobs:
       run:
         shell: bash
     strategy:
-      fail-fast: ${{ github.event_name == 'push' }}
+      fail-fast: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged) }}
       matrix:
         include:
         - base: slim
@@ -45,7 +49,7 @@ jobs:
           type=semver,pattern=v{{major}}.{{minor}}
           type=semver,pattern=v{{major}}
     - uses: docker/login-action@v2
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged)
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
@@ -57,7 +61,7 @@ jobs:
         context: ${{ matrix.context }}
         file: ${{ matrix.file }}
         platforms: linux/arm64, linux/amd64, linux/arm/v7, linux/386, linux/arm/v6
-        push: ${{ github.event_name == 'push' }}
+        push: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged) }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
     - name: Extract Major and Minor Version
@@ -92,7 +96,7 @@ jobs:
     name: Build Release Files
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: ${{ github.event_name == 'push' }}
+      fail-fast: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged) }}
       matrix:
         include:
         - os: ubuntu-latest
