@@ -3,7 +3,7 @@ build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core>=1.0.0"]
 
 [project]
-authors = [{name = "Henning Merklinger", email = "henning.merklinger@gmail.com"}]
+authors = [{name = "Ihor Chaban", email = "igor.chaban.1995@gmail.com"}]
 dependencies = [
   'apprise (>=1.4.0,<2.0.0)',
   'babel (>=2.16.0,<3.0.0)',
@@ -33,8 +33,8 @@ scanner = "tgtg_scanner.__main__:main"
 tgtg_server = "tests.tgtg_server:main"
 
 [project.urls]
-documentation = "https://github.com/Der-Henning/tgtg/wiki"
-repository = "https://github.com/Der-Henning/tgtg"
+documentation = "https://github.com/ihor-chaban/tgtg-scanner/wiki"
+repository = "https://github.com/ihor-chaban/tgtg-scanner"
 
 [tool.poetry]
 packages = [{include = "tgtg_scanner"}]
