@@ -1,4 +1,3 @@
-<!-- markdownlint-disable-next-line MD041 -->
 ## 1. I am getting Error 403 all the time
 
 ### Cause
@@ -53,21 +52,21 @@ Now you can click and buy it in the official Too Good To Go app.
 
 The bot implements the following commands:
 
-+ `/reserve`: Lists all your favorite Magic Bags and currently available amount.
-Click on an item to reserve it as soon as it becomes available.
-To reserve several Magic Bags from the same store at once click several times on the same item.
-For each time you click on the item, an additional Magic Bag will be added.
-+ `/reserveall`: Creates reservations for all your favorite Magic Bags at once.
-The same as clicking manually on each item in the `/reserve` menu.
-If such a reservation already exists, an additional Magic Bag will be added to it.
-+ `/reservations`: Lists all active reservations in your queue. Click on a reservation to cancel it with all Magic Bags included.
-+ `/orders`: Lists all currently active orders that are active for up to 5 minutes.
-Click on an order to cancel it and release the item to buy it in the official Too Good To Go app.
-+ `/cancelallreservations`: Cancels all reservations created in the `/reserve` or `/reserveall` menus.
-The same as clicking manually on each reservation in the `/reservations` menu.
-+ `/cancelallorders`: Cancels all active orders visible in the `/orders` menu.
-The same as clicking on each order in the `/orders` menu.
-+ `/cancelall`: Cancels all reservations and active orders. The same as doing `/cancelallreservations` and `/cancelallorders` at once.
+- `/reserve`: Lists all your favorite Magic Bags and currently available amount.
+  Click on an item to reserve it as soon as it becomes available.
+  To reserve several Magic Bags from the same store at once click several times on the same item.
+  For each time you click on the item, an additional Magic Bag will be added.
+- `/reserveall`: Creates reservations for all your favorite Magic Bags at once.
+  The same as clicking manually on each item in the `/reserve` menu.
+  If such a reservation already exists, an additional Magic Bag will be added to it.
+- `/reservations`: Lists all active reservations in your queue. Click on a reservation to cancel it with all Magic Bags included.
+- `/orders`: Lists all currently active orders that are active for up to 5 minutes.
+  Click on an order to cancel it and release the item to buy it in the official Too Good To Go app.
+- `/cancelallreservations`: Cancels all reservations created in the `/reserve` or `/reserveall` menus.
+  The same as clicking manually on each reservation in the `/reservations` menu.
+- `/cancelallorders`: Cancels all active orders visible in the `/orders` menu.
+  The same as clicking on each order in the `/orders` menu.
+- `/cancelall`: Cancels all reservations and active orders. The same as doing `/cancelallreservations` and `/cancelallorders` at once.
 
 When bags become available, it will reserve as many bags as you have in your queue in one order.
 If there are fewer available bags than you have in your queue it will reserve all available bags.
