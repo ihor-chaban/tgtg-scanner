@@ -78,7 +78,7 @@ The images are built for Linux on `amd64`, `arm64`, `armv7`, `armv6`, and `i386`
 
 1. Install Docker
 2. Copy and edit `docker-compose.yml` as described in the
-[Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
+   [Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
 3. Run `docker compose up -d`
 
 The container automatically creates a volume mounting `\tokens`
@@ -98,7 +98,7 @@ docker-compose up -d
 1. Install Git, Python>=3.9 and pip
 2. Run `pip install git+https://github.com/ihor-chaban/tgtg-scanner`
 3. Create `config.ini` as described in the
-[Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
+   [Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
 4. Start scanner with `python -m tgtg_scanner`
 
 To update to the latest release run
@@ -117,7 +117,7 @@ Method for advanced usage.
 4. Run `poetry install --without test,build`
 5. Create config file `cp config.sample.ini config.ini`
 6. Modify `config.ini` as described in the
-[Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
+   [Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
 7. Run `poetry run scanner`
 
 Alternatively, you can use environment variables as described in the wiki.
@@ -155,7 +155,6 @@ accessed via optional command line arguments.
 Running `scanner[.exe] --help`, `poetry run scanner --help`, `python tgtg_scanner/__main__.py --help`
 or `python -m tgtg_scanner --help` displays the available commands.
 
-<!-- markdownlint-disable MD013 -->
 ```txt
 usage: scanner [-h] [-v] [-d] [-c config_file] [-l log_file] [-t | -f | -F | -a item_id [item_id ...] | -r item_id [item_id ...] | -R] [-j | -J] [--base_url BASE_URL]
 
@@ -181,7 +180,6 @@ options:
   -J, --json_pretty     output as pretty json
   --base_url BASE_URL   Overwrite TGTG API URL for testing
 ```
-<!-- markdownlint-enable MD013 -->
 
 Example (Unix only):
 

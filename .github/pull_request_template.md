@@ -1,4 +1,3 @@
-<!-- markdownlint-disable-next-line MD041 -->
 ### Pull Request Checklist
 
 * [ ] Have you checked to ensure there aren't other open [Pull Requests](../../pulls) for the same update/change?
