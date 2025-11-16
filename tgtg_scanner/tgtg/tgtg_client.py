@@ -8,7 +8,6 @@ import time
 import uuid
 from datetime import datetime
 from http import HTTPStatus
-from typing import Union
 from urllib.parse import urljoin, urlsplit
 
 import requests
@@ -24,7 +23,7 @@ from tgtg_scanner.errors import (
 
 log = logging.getLogger("tgtg")
 BASE_URL = "https://apptoogoodtogo.com/api/"
-API_ITEM_ENDPOINT = "item/v8/"
+API_ITEM_ENDPOINT = "item/v9/"
 FAVORITE_ITEM_ENDPOINT = "user/favorite/v1/{}/update"
 AUTH_BY_EMAIL_ENDPOINT = "auth/v5/authByEmail"
 AUTH_POLLING_ENDPOINT = "auth/v5/authByRequestPollingId"
@@ -64,11 +63,11 @@ class TgtgSession(requests.Session):
 
     def __init__(
         self,
-        user_agent: Union[str, None] = None,
+        user_agent: str | None = None,
         language: str = "en-UK",
-        timeout: Union[int, None] = None,
-        proxies: Union[dict, None] = None,
-        datadome_cookie: Union[str, None] = None,
+        timeout: int | None = None,
+        proxies: dict | None = None,
+        datadome_cookie: str | None = None,
         base_url: str = BASE_URL,
         *args,
         **kwargs,
@@ -93,7 +92,7 @@ class TgtgSession(requests.Session):
             domain = f".{'local' if domain == 'localhost' else domain}"
             self.cookies.set("datadome", datadome_cookie, domain=domain, path="/", secure=True)
 
-    def post(self, *args, access_token: Union[str, None] = None, **kwargs) -> requests.Response:
+    def post(self, *args, access_token: str | None = None, **kwargs) -> requests.Response:
         if "headers" not in kwargs:
             kwargs["headers"] = self.headers
         if access_token:
