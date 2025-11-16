@@ -1,6 +1,6 @@
 ### Pull Request Checklist
 
-* [ ] Have you checked to ensure there aren't other open [Pull Requests](../../pulls) for the same update/change?
+* [ ] Have you checked to ensure there aren't other open [Pull Requests](../pulls) for the same update/change?
 * [ ] Did you make your Pull Request on the dev branch?
 * [ ] Does your submission pass tests? `make test`
 * [ ] Have you lint your code locally prior to submission? `make lint`
