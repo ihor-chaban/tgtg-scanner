@@ -36,12 +36,12 @@ runs:
         poetry config virtualenvs.in-project true
         poetry config installer.max-workers 1
     - uses: actions/cache@v4
-      if: inputs.without != '' && inputs.install-dependencies
+      if: inputs.without != '' && inputs.install-dependencies && runner.os != 'macOS'
       with:
         path: ./.venv
         key: venv-without-${{ inputs.without }}-poetry-${{ inputs.poetry-version }}-python-${{ inputs.python-version }}-${{ hashFiles('poetry.lock') }}-${{ runner.os }}-${{ runner.arch }}
     - uses: actions/cache@v4
-      if: inputs.without == '' && inputs.install-dependencies
+      if: inputs.without == '' && inputs.install-dependencies && runner.os != 'macOS'
       with:
         path: ./.venv
         key: venv-poetry-${{ inputs.poetry-version }}-python-${{ inputs.python-version }}-${{ hashFiles('poetry.lock') }}-${{ runner.os }}-${{ runner.arch }}
