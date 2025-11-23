@@ -235,7 +235,7 @@ class TgtgClient:
         else:
             version = self.apk_version
         log.debug("Using APK version %s.", version)
-        return random.choice(USER_AGENTS).format(DEFAULT_APK_VERSION)
+        return random.choice(USER_AGENTS).format(version)
 
     @staticmethod
     def get_latest_apk_version() -> str:
