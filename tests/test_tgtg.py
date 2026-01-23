@@ -44,6 +44,10 @@ def test_tgtg_login_with_mail(mocker: MockerFixture):
         "tgtg_scanner.tgtg.tgtg_client.TgtgClient.get_latest_apk_version",
         return_value="22.11.11",
     )
+    mocker.patch(
+        "tgtg_scanner.tgtg.tgtg_client.prompt_via_browser",
+        return_value=None,
+    )
     client = TgtgClient(email="test@example.com", polling_wait_time=1)
     auth_response_data = {
         "state": "WAIT",
@@ -74,7 +78,17 @@ def test_tgtg_login_with_mail(mocker: MockerFixture):
     client.login()
     assert client.access_token == poll_response_data.get("access_token")
     assert client.refresh_token == poll_response_data.get("refresh_token")
-    assert json.loads(responses.calls[1].request.body) == {
+    # Find the polling request (has request_polling_id in the body)
+    polling_call = None
+    for call in responses.calls:
+        try:
+            body = json.loads(call.request.body)
+            if "request_polling_id" in body:
+                polling_call = body
+                break
+        except (json.JSONDecodeError, AttributeError):
+            continue
+    assert polling_call == {
         "device_type": client.device_type,
         "email": client.email,
         "request_polling_id": auth_response_data.get("polling_id"),
@@ -173,7 +187,17 @@ def test_tgtg_set_favorite(mocker: MockerFixture):
         refresh_token="refresh_token",
     )
     client.set_favorite(item_id, True)
-    assert json.loads(responses.calls[0].request.body) == {"is_favorite": True}
+    # Find the set_favorite request (has is_favorite in the body)
+    favorite_call = None
+    for call in responses.calls:
+        try:
+            body = json.loads(call.request.body)
+            if "is_favorite" in body:
+                favorite_call = body
+                break
+        except (json.JSONDecodeError, AttributeError):
+            continue
+    assert favorite_call == {"is_favorite": True}
 
 
 @pytest.mark.tgtg_api

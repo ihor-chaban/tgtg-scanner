@@ -19,6 +19,8 @@ ATTRS = [
     "price",
     "value",
     "currency",
+    "previous_price",
+    "price_drop",
     "pickupdate",
     "favorite",
     "rating",
@@ -73,6 +75,7 @@ class Item:
         self._price: float = item_price.get("minor_units", 0) / 10 ** item_price.get("decimals", 0)
         self._value: float = item_value.get("minor_units", 0) / 10 ** item_value.get("decimals", 0)
         self.currency: str = item_price.get("code", "-")
+        self._previous_price: float | None = None
         self.item_logo: str = item.get("logo_picture", {}).get(
             "current_url",
             "https://tgtg-mkt-cms-prod.s3.eu-west-1.amazonaws.com/13512/TGTG_Icon_White_Cirle_1988x1988px_RGB.png",
@@ -103,6 +106,16 @@ class Item:
     @property
     def value(self) -> str:
         return self._format_currency(self._value)
+
+    @property
+    def previous_price(self) -> str | None:
+        if self._previous_price is None:
+            return None
+        return self._format_currency(self._previous_price)
+
+    @property
+    def price_drop(self) -> str:
+        return "YES" if self._previous_price is not None and self._price < self._previous_price else "NO"
 
     def _format_decimal(self, number: float) -> str:
         return babel.numbers.format_decimal(number, locale=self.locale)

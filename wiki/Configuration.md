@@ -27,6 +27,8 @@ Variables with the `locale` property are affected by the `locale` option and ret
 | display_name     | name of the item as in the APP      | `Chutney Indian Food - Hamburg – Europapassage 2.OG`                                                   |        |
 | description      | item description                    | `Rette eine Magic Bag mit leckerem indischen Essen.`                                                   |        |
 | price            | item price                          | `3.20`                                                                                                 |        |
+| previous_price   | previous item price                 | `3.40`                                                                                                 |        |
+| price_drop       | recent price drop                   | `YES`                                                                                                  |        |
 | value            | item value                          | `9.60`                                                                                                 |        |
 | currency         | price/value currency                | `EUR`                                                                                                  |        |
 | pickupdate       | formatted string                    | `tomorrow, 18:00 - 21:50`                                                                              | YES    |
@@ -63,22 +65,24 @@ You can combine multiple crons as semicolon separated list.
 
 ### [MAIN] / general settings
 
-| config.ini   | environment   | description                                                                       | default     |
-| ------------ | ------------- | --------------------------------------------------------------------------------- | ----------- |
-| Debug        | DEBUG         | enable debugging mode                                                             | `false`     |
-| SleepTime    | SLEEP_TIME    | time between two consecutive scans in seconds                                     | `60`        |
-| ScheduleCron | SCHEDULE_CRON | run only on schedule                                                              | `* * * * *` |
-| ItemIDs      | ITEM_IDS      | **Depreciated!** comma-separated list of additional (none favorite) items to scan |             |
-| Metrics      | METRICS       | enable Prometheus metrics HTTP server                                             | `false`     |
-| MetricsPort  | METRICS_PORT  | port for metrics server                                                           | `8000`      |
-| DisableTests | DISABLE_TESTS | disable test notifications on startup                                             | `false`     |
-| Quiet        | QUIET         | minimal console output                                                            | `false`     |
-| Locale       | LOCALE        | localization                                                                      | `en_US`     |
-| TimeFormat   | TIME_FORMAT   | 12h or 24h                                                                        | `24h`       |
-| Activity     | ACTIVITY      | show running indicator (always disabled in docker)                                | `true`      |
-|              | TZ            | timezone for docker based setups, e.g. `Berlin/Europe`                            |             |
-|              | UID           | set user id for docker container                                                  | `1000`      |
-|              | GID           | set group id for docker container                                                 | `1000`      |
+| config.ini      | environment      | description                                                                       | default     |
+| --------------- | ---------------- | --------------------------------------------------------------------------------- | ----------- |
+| Debug           | DEBUG            | enable debugging mode                                                             | `false`     |
+| SleepTime       | SLEEP_TIME       | time between two consecutive scans in seconds                                     | `60`        |
+| ScheduleCron    | SCHEDULE_CRON    | run only on schedule                                                              | `* * * * *` |
+| ItemIDs         | ITEM_IDS         | **Depreciated!** comma-separated list of additional (none favorite) items to scan |             |
+| Metrics         | METRICS          | enable Prometheus metrics HTTP server                                             | `false`     |
+| MetricsPort     | METRICS_PORT     | port for metrics server                                                           | `8000`      |
+| DisableTests    | DISABLE_TESTS    | disable test notifications on startup                                             | `false`     |
+| Quiet           | QUIET            | minimal console output                                                            | `false`     |
+| Locale          | LOCALE           | localization                                                                      | `en_US`     |
+| TimeFormat      | TIME_FORMAT      | 12h or 24h                                                                        | `24h`       |
+| PriceMonitoring | PRICE_MONITORING | Send notifications on price drops                                                 | `false`     |
+| Activity        | ACTIVITY         | show running indicator (always disabled in docker)                                | `true`      |
+| Port            | PORT             | Port for Login Process Webserver. (Defaults to random free port)                  | `0`         |
+|                 | TZ               | timezone for docker based setups, e.g. `Berlin/Europe`                            |             |
+|                 | UID              | set user id for docker container                                                  | `1000`      |
+|                 | GID              | set group id for docker container                                                 | `1000`      |
 
 ### [TGTG] / TGTG account
 

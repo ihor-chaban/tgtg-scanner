@@ -95,7 +95,7 @@ docker-compose up -d
 
 ### Install as package
 
-1. Install Git, Python>=3.9 and pip
+1. Install Git, Python>=3.10 and pip
 2. Run `pip install git+https://github.com/ihor-chaban/tgtg-scanner`
 3. Create `config.ini` as described in the
    [Wiki](https://github.com/ihor-chaban/tgtg-scanner/wiki/Configuration)
@@ -111,7 +111,7 @@ you may need to install `libffi-dev`.
 
 Method for advanced usage.
 
-1. Install Git, Python>=3.9 and poetry
+1. Install Git, Python>=3.10 and poetry
 2. Clone the repository `git clone https://github.com/ihor-chaban/tgtg-scanner`
 3. Enter repository folder `cd tgtg`
 4. Run `poetry install --without test,build`
@@ -141,9 +141,17 @@ You will find the bundled binary including the `config.ini` in the `./dist` dire
 ## Usage
 
 When the scanner is started it will first try to log in to your TGTG account.
-Similar to logging in to the TGTG app, you have to click on the link sent to you by mail.
+~~Similar to logging in to the TGTG app, you have to click on the link sent to you by mail.
 This won't work on your mobile phone if you have installed the TGTG app,
-so you have to check your mailbox on your PC.
+so you have to check your mailbox on your PC.~~
+
+**NEW LOGIN Process!**
+
+**When logging in you receive a mail containing a Pin.
+The scanner starts a web form where you can past the Pin.
+The link to the form is printed in the console.
+With the `Port` setting you can specify a port for the webform.
+This is especially necessary in a Docker setup.**
 
 After a successful login, the scanner will send a test notification on all configured notifiers.
 If you don't receive any notifications, please check your configuration.
