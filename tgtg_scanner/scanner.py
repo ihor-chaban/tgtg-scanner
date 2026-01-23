@@ -66,6 +66,7 @@ class Scanner:
             base_url=self.config.tgtg.base_url,
             apk_version=self.config.tgtg.apk_version,
             user_agent=self.config.tgtg.user_agent,
+            port=self.config.port,
         )
         self.reservations = Reservations(self.tgtg_client)
         self.favorites = Favorites(self.tgtg_client)
@@ -132,15 +133,22 @@ class Scanner:
         return [Item(item, self.location, self.config.locale, self.config.time_format) for item in items]
 
     def _check_item(self, item: Item) -> None:
-        """Checks if the available item amount raised from zero to something
+        """Checks if the available item amount raised from zero to something or price changed
         and triggers notifications.
         """
         state_item = self.state.get(item.item_id)
         if state_item is not None:
-            if state_item.items_available == item.items_available:
-                return
-            log.info("%s - new amount: %s", item.display_name, item.items_available)
-            if state_item.items_available == 0 and item.items_available > 0:
+            item._previous_price = state_item._price
+            send_notification = False
+            if state_item.items_available != item.items_available:
+                log.info("%s - amount changed from %s to %s", item.display_name, state_item.items_available, item.items_available)
+                if state_item.items_available == 0:
+                    send_notification = True
+            if state_item.price != item.price:
+                log.info("%s - price changed from %ss to %s", item.display_name, state_item.price, item.price)
+                if self.config.price_monitoring and item.items_available > 0 and item._price < state_item._price:
+                    send_notification = True
+            if send_notification:
                 self._send_messages(item)
                 self.metrics.send_notifications.labels(item.item_id, item.display_name).inc()
         self.metrics.update(item)

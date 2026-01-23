@@ -20,3 +20,4 @@ pytest_tmp
 out.toml
 out.yaml
 dev.py
+compose.yml

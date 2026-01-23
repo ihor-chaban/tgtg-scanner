@@ -14,6 +14,7 @@ services:
       - SLEEP_TIME=60
       - TZ=Europe/Berlin
       - LOCALE=de_DE
+      - PORT=3000
 
       - TELEGRAM=true
       - TELEGRAM_TOKEN=
@@ -21,6 +22,9 @@ services:
 
     volumes:
       - tokens:/tokens ## volume to save TGTG credentials to reuse on next start up and avoid login mail
+
+    ports:
+      - 3000:3000
 
 volumes:
   tokens:

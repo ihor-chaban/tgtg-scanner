@@ -546,6 +546,7 @@ class Config(BaseConfig):
     quiet: bool = False
     docker: bool = False
     activity: bool = True
+    port: int = 0
     tgtg: TgtgConfig = field(default_factory=TgtgConfig)
     location: LocationConfig = field(default_factory=LocationConfig)
     token_path: str | None = None
@@ -559,6 +560,7 @@ class Config(BaseConfig):
     webhook: WebhookConfig = field(default_factory=WebhookConfig)
     script: ScriptConfig = field(default_factory=ScriptConfig)
     discord: DiscordConfig = field(default_factory=DiscordConfig)
+    price_monitoring: bool = False
 
     def __post_init__(self):
         if self.file:
@@ -625,6 +627,8 @@ class Config(BaseConfig):
         self._ini_get_boolean(parser, "MAIN", "Quiet", "quiet")
         self._ini_get_boolean(parser, "MAIN", "Docker", "docker")
         self._ini_get_boolean(parser, "MAIN", "Activity", "activity")
+        self._ini_get_boolean(parser, "MAIN", "PriceMonitoring", "price_monitoring")
+        self._ini_get_int(parser, "MAIN", "Port", "port")
 
     def _read_env(self):
         self._env_get_list("ITEM_IDS", "item_ids")
@@ -639,6 +643,8 @@ class Config(BaseConfig):
         self._env_get_boolean("QUIET", "quiet")
         self._env_get_boolean("DOCKER", "docker")
         self._env_get_boolean("ACTIVITY", "activity")
+        self._env_get_boolean("PRICE_MONITORING", "price_monitoring")
+        self._env_get_int("PORT", "port")
 
     def _open(self, file: str, mode: str) -> IO[Any]:
         if self.token_path is None:

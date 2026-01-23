@@ -31,7 +31,7 @@ class MaskConfigurationError(ConfigurationError):
         super().__init__(self.message)
 
 
-class TGTGConfigurationError(ConfigurationError):
+class TgtgConfigurationError(ConfigurationError):
     def __init__(self, message="Invalid TGTG configuration"):
         self.message = message
         super().__init__(self.message)
