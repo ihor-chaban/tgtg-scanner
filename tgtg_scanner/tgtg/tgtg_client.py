@@ -104,7 +104,7 @@ class TgtgSession(requests.Session):
         self._base_url = base_url
 
     def send(self, request: requests.PreparedRequest, *args, **kwargs) -> requests.Response:
-        if self.last_api_request:
+        if self.last_api_request and request.url is not None and CREATE_ORDER_ENDPOINT not in request.url:
             wait = max(0, DEFAULT_MIN_TIME_BETWEEN_REQUESTS - (datetime.now() - self.last_api_request).seconds)
             log.debug(f"Waiting {wait} seconds.")
             time.sleep(wait)
