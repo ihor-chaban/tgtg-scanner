@@ -13,7 +13,8 @@ import re
 from collections.abc import Iterator
 from typing import Any
 
-from tgtg import BASE_URL, CREATE_ORDER_ENDPOINT
+import tgtg
+from tgtg import BASE_URL
 from tgtg import TgtgClient as _UpstreamTgtgClient
 
 from tgtg_scanner.pin_prompt import prompt_via_browser
