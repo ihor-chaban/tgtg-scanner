@@ -10,12 +10,9 @@ import builtins
 import contextlib
 import logging
 import re
-import time
 from collections.abc import Iterator
-from datetime import datetime
 from typing import Any
 
-import tgtg
 from tgtg import BASE_URL, CREATE_ORDER_ENDPOINT
 from tgtg import TgtgClient as _UpstreamTgtgClient
 
@@ -24,21 +21,6 @@ from tgtg_scanner.pin_prompt import prompt_via_browser
 log = logging.getLogger("tgtg")
 
 _DATADOME_RE = re.compile(r"datadome=([^;]+)", re.IGNORECASE)
-
-
-# Patch TgtgSession.send to skip delay for order creation
-# See https://github.com/ihor-chaban/tgtg-scanner/pull/13
-def _patched_send(self, request, *args, **kwargs):
-    if self.last_api_request and request.url is not None and CREATE_ORDER_ENDPOINT not in request.url:
-        wait = max(0, tgtg.DEFAULT_MIN_TIME_BETWEEN_REQUESTS - (datetime.now() - self.last_api_request).total_seconds())
-        log.debug(f"Waiting {wait} seconds.")
-        time.sleep(wait)
-    response = super(tgtg.TgtgSession, self).send(request, *args, **kwargs)
-    self.last_api_request = datetime.now()
-    return response
-
-
-tgtg.TgtgSession.send = _patched_send
 
 
 def normalize_cookie(value: str | None) -> str | None:
