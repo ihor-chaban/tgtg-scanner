@@ -13,17 +13,18 @@ import re
 import time
 from collections.abc import Iterator
 from datetime import datetime
+from typing import Any
 
 import tgtg
-from tgtg import BASE_URL
+from tgtg import BASE_URL, CREATE_ORDER_ENDPOINT
 from tgtg import TgtgClient as _UpstreamTgtgClient
-from tgtg import CREATE_ORDER_ENDPOINT
 
 from tgtg_scanner.pin_prompt import prompt_via_browser
 
 log = logging.getLogger("tgtg")
 
 _DATADOME_RE = re.compile(r"datadome=([^;]+)", re.IGNORECASE)
+
 
 # Patch TgtgSession.send to skip delay for order creation
 # See https://github.com/ihor-chaban/tgtg-scanner/pull/13
@@ -35,6 +36,7 @@ def _patched_send(self, request, *args, **kwargs):
     response = super(tgtg.TgtgSession, self).send(request, *args, **kwargs)
     self.last_api_request = datetime.now()
     return response
+
 
 tgtg.TgtgSession.send = _patched_send
 
@@ -90,11 +92,11 @@ class TgtgClient(_UpstreamTgtgClient):
 
     def __init__(
         self,
-        *args,
+        *args: Any,
         pin_port: int = 0,
         max_polling_tries: int | None = None,
         polling_wait_time: int | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         self.pin_port = pin_port
         if max_polling_tries is not None:

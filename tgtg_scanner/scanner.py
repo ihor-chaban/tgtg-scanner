@@ -77,7 +77,7 @@ class Scanner:
         user_agent = resolve_user_agent(tgtg.user_agent, tgtg.apk_version)
         if user_agent:
             kwargs["user_agent"] = user_agent
-        return TgtgClient(**kwargs)
+        return TgtgClient(**kwargs)  # type: ignore[arg-type]
 
     @property
     def state(self) -> dict[str, Item]:

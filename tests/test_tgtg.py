@@ -131,7 +131,7 @@ def test_tgtg_api(item_properties: dict):
     }
     if ua := resolve_user_agent(config.tgtg.user_agent, config.tgtg.apk_version):
         kwargs["user_agent"] = ua
-    client = TgtgClient(**kwargs)
+    client = TgtgClient(**kwargs)  # type: ignore[arg-type]
 
     if env_file:
         creds = client.get_credentials()
