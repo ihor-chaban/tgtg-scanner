@@ -57,20 +57,24 @@ class Reservations:
         for reservation in self.reservation_query:
             item = state.get(reservation.item_id)
             if item and item.items_available > 0:
+                ordered = Reservation(
+                    reservation.item_id,
+                    min(reservation.amount, item.items_available),
+                    reservation.display_name,
+                )
                 try:
-                    remaining_amount = reservation.amount
-                    reservation.amount = min(reservation.amount, item.items_available)
-                    remaining_amount -= reservation.amount
-                    self._create_order(reservation)
-                    if remaining_amount > 0:
-                        reservation.amount = remaining_amount
-                    else:
-                        self.reservation_query.remove(reservation)
-                    callback(reservation)
-                    continue
+                    self._create_order(ordered)
                 except Exception as exc:
-                    reservation.amount += remaining_amount
                     log.warning("Order failed: %s", exc)
+                else:
+                    reservation.amount -= ordered.amount
+                    if reservation.amount > 0:
+                        remaining.append(reservation)
+                    try:
+                        callback(ordered)
+                    except Exception as exc:
+                        log.warning("Order notification failed: %s", exc)
+                    continue
             remaining.append(reservation)
         self.reservation_query = remaining
 

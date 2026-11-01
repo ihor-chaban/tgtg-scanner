@@ -48,3 +48,42 @@ def test_cancel_all_orders(reservations: Reservations):
     order2 = Order("2", "123", 2, "Test Item 2")
     reservations.active_orders = {order1.id: order1, order2.id: order2}
     reservations.cancel_all_orders()
+
+
+def test_make_orders_partial_amount_keeps_remainder(reservations: Reservations, tgtg_item: dict):
+    tgtg_item["items_available"] = 2
+    callback_mock = MagicMock()
+    reservations.reserve("123", "Test Item", 5)
+    reservations.make_orders({"123": Item(tgtg_item)}, callback_mock)
+    reservations.client.create_order.assert_called_once_with("123", 2)  # type: ignore[attr-defined]
+    callback_mock.assert_called_once_with(Reservation("123", 2, "Test Item"))
+    assert reservations.reservation_query == [Reservation("123", 3, "Test Item")]
+
+
+def test_make_orders_keeps_ordering_remainder_after_each_expiry(reservations: Reservations, tgtg_item: dict):
+    tgtg_item["items_available"] = 2
+    reservations.reserve("123", "Test Item", 6)
+    ordered = []
+    for _ in range(3):  # each scan sees 2 bags again, e.g. after the previous order expired
+        reservations.make_orders({"123": Item(tgtg_item)}, lambda res: ordered.append(res.amount))
+    assert ordered == [2, 2, 2]
+    assert reservations.reservation_query == []
+
+
+def test_make_orders_does_not_skip_next_reservation(reservations: Reservations, tgtg_item: dict):
+    callback_mock = MagicMock()
+    reservations.reserve("123", "Test Item")
+    reservations.reserve("456", "Other Item")
+    item = Item(tgtg_item)
+    reservations.make_orders({"123": item, "456": item}, callback_mock)
+    assert callback_mock.call_count == 2
+    assert reservations.reservation_query == []
+
+
+def test_make_orders_failure_keeps_amount(reservations: Reservations, tgtg_item: dict):
+    reservations.client.create_order.side_effect = Exception("sold out")  # type: ignore[attr-defined]
+    callback_mock = MagicMock()
+    reservations.reserve("123", "Test Item", 2)
+    reservations.make_orders({"123": Item(tgtg_item)}, callback_mock)
+    callback_mock.assert_not_called()
+    assert reservations.reservation_query == [Reservation("123", 2, "Test Item")]
