@@ -71,6 +71,7 @@ You can combine multiple crons as semicolon separated list.
 | SleepTime       | SLEEP_TIME       | time between two consecutive scans in seconds                                     | `60`        |
 | ScheduleCron    | SCHEDULE_CRON    | run only on schedule                                                              | `* * * * *` |
 | ItemIDs         | ITEM_IDS         | **Depreciated!** comma-separated list of additional (none favorite) items to scan |             |
+| ReserveItems    | RESERVE_ITEMS    | comma-separated `item_id:amount` list reserved on startup (amount defaults to 1)  |             |
 | Metrics         | METRICS          | enable Prometheus metrics HTTP server                                             | `false`     |
 | MetricsPort     | METRICS_PORT     | port for metrics server                                                           | `8000`      |
 | DisableTests    | DISABLE_TESTS    | disable test notifications on startup                                             | `false`     |

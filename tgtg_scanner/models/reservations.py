@@ -23,6 +23,13 @@ class Reservation:
     display_name: str
 
 
+@dataclass
+class StartupReservations:
+    """Reservations created from the config on startup, announced in one message."""
+
+    reservations: list[Reservation]
+
+
 class Reservations:
     def __init__(self, client: TgtgClient) -> None:
         self.client = client

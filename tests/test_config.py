@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import pytest
 
+from tgtg_scanner.errors import ConfigurationError
 from tgtg_scanner.models import Config, Cron
 
 SYS_PLATFORM = platform.system()
@@ -108,3 +109,23 @@ def test_env_get(monkeypatch: pytest.MonkeyPatch):
     assert config.webhook.headers == {"Accept": "json"}
     assert config.webhook.cron == Cron("* * 1-5 * *")
     assert config.webhook.body == '{"content": "${{items_available}} panier(s) à ${{price}} € \nÀ récupérer 🍔"}'
+
+
+def test_reserve_items_ini():
+    with tempfile.NamedTemporaryFile(delete=not IS_WINDOWS) as temp_file:
+        temp_file.write(b"[MAIN]\nReserveItems = 123:2, 456 ,789:1, 123:1\n")
+        temp_file.seek(0)
+        config = Config(temp_file.name)
+        assert config.reserve_items == {"123": 3, "456": 1, "789": 1}
+
+
+def test_reserve_items_env(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("RESERVE_ITEMS", "123:2,456")
+    assert Config().reserve_items == {"123": 2, "456": 1}
+
+
+@pytest.mark.parametrize("value", ["123:x", "123:0", ":2", "123:-1"])
+def test_reserve_items_invalid(monkeypatch: pytest.MonkeyPatch, value: str):
+    monkeypatch.setenv("RESERVE_ITEMS", value)
+    with pytest.raises(ConfigurationError):
+        Config()

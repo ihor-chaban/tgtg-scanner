@@ -73,6 +73,24 @@ If there are fewer available bags than you have in your queue it will reserve al
 The reservation will remain active with the remaining bags that haven't been reserved yet.
 If the order fails (e.g. sold out), the reservation amount will remain the same.
 
+### Reserve on startup
+
+With the `ReserveItems` option (`RESERVE_ITEMS` as environment variable) the scanner creates reservations right after it logged in to Too Good To Go.
+This is the same as clicking on the item in the `/reserve` menu, e.g.
+
+```ini
+[MAIN]
+ReserveItems = 1234567:2, 2345678
+```
+
+reserves 2 bags of item `1234567` and 1 bag of item `2345678` (the amount defaults to 1).
+The bags are ordered as soon as they are available.
+Items that are not in your favorites are scanned in addition.
+Unknown item IDs are logged and skipped.
+The Telegram bot sends one message listing the reservations that were created.
+Other notifiers do not send anything for reservations.
+As with a manual reservation, they stay queued until you cancel them, e.g. with `/cancelallreservations`.
+
 **Important!**
 Certain stores may have a maximum limit on bags per customer.
 Please ensure that the desired quantity for reservation from this store is allowed first.

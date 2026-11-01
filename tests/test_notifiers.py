@@ -1,13 +1,15 @@
+import asyncio
 import json
 import platform
 from time import sleep
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import responses
 from pytest_mock.plugin import MockerFixture
 
 from tgtg_scanner.models import Config, Cron, Favorites, Item, Reservations
+from tgtg_scanner.models.reservations import Reservation, StartupReservations
 from tgtg_scanner.notifiers.apprise import Apprise
 from tgtg_scanner.notifiers.console import Console
 from tgtg_scanner.notifiers.discord import Discord
@@ -366,3 +368,39 @@ def test_discord(test_item: Item, reservations: Reservations, favorites: Favorit
     discord.send(test_item)
     sleep(0.5)
     discord.stop()
+
+
+def _telegram_for_orders(reservations: Reservations, favorites: Favorites) -> Telegram:
+    config = Config()
+    config.telegram.enabled = False
+    config.telegram.chat_ids = ["123456"]
+    telegram = Telegram(config, reservations, favorites)
+    telegram.chat_ids = ["123456"]
+    return telegram
+
+
+def test_telegram_startup_reservations_message(reservations: Reservations, favorites: Favorites):
+    telegram = _telegram_for_orders(reservations, favorites)
+    telegram._send_message = AsyncMock()  # type: ignore[method-assign]
+    summary = StartupReservations([Reservation("1", 6, "Store A"), Reservation("2", 2, "Store B")])
+    asyncio.run(telegram._send(summary))
+    telegram._send_message.assert_awaited_once()
+    assert telegram._send_message.await_args is not None
+    message = telegram._send_message.await_args.args[0]
+    assert "Reservations created on startup" in message
+    assert "• Store A × 6" in message
+    assert "• Store B × 2" in message
+
+
+def test_startup_reservations_are_queued_and_ignored_by_item_only_notifiers(
+    reservations: Reservations, favorites: Favorites, capsys: pytest.CaptureFixture
+):
+    config = Config()
+    config.console.enabled = True
+    config.console.cron = Cron()
+    console = Console(config, reservations, favorites)
+    console.thread = MagicMock(is_alive=lambda: True)  # do not start the notifier thread
+    console.send(StartupReservations([Reservation("1", 6, "Store A")]))
+    assert console.queue.qsize() == 1
+    console._send(console.queue.get_nowait())  # type: ignore[arg-type]
+    assert capsys.readouterr().out == ""

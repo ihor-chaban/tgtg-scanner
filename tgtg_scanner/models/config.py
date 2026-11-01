@@ -79,6 +79,25 @@ class BaseConfig(ABC):
             except json.JSONDecodeError as err:
                 raise ConfigurationError(f"Invalid JSON value for {section}.{key} - {err}") from err
 
+    @staticmethod
+    def _parse_reserve_items(value: str, key: str) -> dict[str, int]:
+        """Parse 'item_id:amount, item_id' into {item_id: amount}; amount defaults to 1."""
+        items: dict[str, int] = {}
+        for entry in value.split(","):
+            entry = entry.strip()
+            if not entry:
+                continue
+            item_id, _, amount = entry.partition(":")
+            item_id = item_id.strip()
+            try:
+                count = int(amount) if amount.strip() else 1
+            except ValueError as err:
+                raise ConfigurationError(f"Invalid amount in {key} entry '{entry}' - {err}") from err
+            if not item_id or count < 1:
+                raise ConfigurationError(f"Invalid {key} entry '{entry}', expected item_id:amount with amount >= 1")
+            items[item_id] = items.get(item_id, 0) + count
+        return items
+
     def _ini_get_cron(self, parser: configparser.ConfigParser, section: str, key: str, attr: str):
         value = parser.get(section, key, fallback=None)
         if value is not None:
@@ -535,6 +554,7 @@ class Config(BaseConfig):
 
     file: str | None = None
     item_ids: list[str] = field(default_factory=list)
+    reserve_items: dict[str, int] = field(default_factory=dict)
     sleep_time: int = 60
     schedule_cron: Cron = field(default_factory=Cron)
     debug: bool = False
@@ -616,6 +636,9 @@ class Config(BaseConfig):
 
     def _read_ini(self, parser: configparser.ConfigParser):
         self._ini_get_list(parser, "MAIN", "ItemIDs", "item_ids")
+        value = parser.get("MAIN", "ReserveItems", fallback=None)
+        if value is not None:
+            self.reserve_items = self._parse_reserve_items(value, "MAIN.ReserveItems")
         self._ini_get_int(parser, "MAIN", "SleepTime", "sleep_time")
         self._ini_get_cron(parser, "MAIN", "ScheduleCron", "schedule_cron")
         self._ini_get_boolean(parser, "MAIN", "Debug", "debug")
@@ -632,6 +655,9 @@ class Config(BaseConfig):
 
     def _read_env(self):
         self._env_get_list("ITEM_IDS", "item_ids")
+        value = getenv("RESERVE_ITEMS")
+        if value is not None:
+            self.reserve_items = self._parse_reserve_items(value, "RESERVE_ITEMS")
         self._env_get_int("SLEEP_TIME", "sleep_time")
         self._env_get_cron("SCHEDULE_CRON", "schedule_cron")
         self._env_get_boolean("DEBUG", "debug")

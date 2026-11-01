@@ -1,7 +1,7 @@
 import logging
 
 from tgtg_scanner.models import Config, Cron, Favorites, Item, Reservations
-from tgtg_scanner.models.reservations import Reservation
+from tgtg_scanner.models.reservations import Reservation, StartupReservations
 from tgtg_scanner.notifiers.apprise import Apprise
 from tgtg_scanner.notifiers.base import Notifier
 from tgtg_scanner.notifiers.console import Console
@@ -46,7 +46,7 @@ class Notifiers:
         """
         return len(self._enabled_notifiers)
 
-    def send(self, item: Item | Reservation) -> None:
+    def send(self, item: Item | Reservation | StartupReservations) -> None:
         """Send notifications on all enabled notifiers.
 
         Args:

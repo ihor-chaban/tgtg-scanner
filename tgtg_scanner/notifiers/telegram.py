@@ -33,7 +33,7 @@ from telegram.warnings import PTBUserWarning
 from tgtg_scanner.errors import MaskConfigurationError, TelegramConfigurationError
 from tgtg_scanner.models import Config, Favorites, Item, Reservations
 from tgtg_scanner.models.favorites import AddFavoriteRequest, RemoveFavoriteRequest
-from tgtg_scanner.models.reservations import Order, Reservation
+from tgtg_scanner.models.reservations import Order, Reservation, StartupReservations
 from tgtg_scanner.notifiers.base import Notifier
 
 log = logging.getLogger("tgtg")
@@ -213,10 +213,10 @@ class Telegram(Notifier):
             return bytes(getattr(item, matches[0].group(1)))
         return None
 
-    async def _send(self, item: Item | Reservation) -> None:  # type: ignore[override]
+    async def _send(self, item: Item | Reservation | StartupReservations) -> None:  # type: ignore[override]
         """Send item information as Telegram message.
 
-        Reservation notifications are always send.
+        Reservation notifications are always send, as is the list of startup reservations.
         Disable Item notification with mute or only_reservations config.
         """
         if self.mute and self.mute < datetime.datetime.now():
@@ -236,6 +236,9 @@ class Telegram(Notifier):
                 ),
                 version=2,
             )
+        elif isinstance(item, StartupReservations):
+            lines = [f"• {res.display_name} × {res.amount}" for res in item.reservations]
+            message = escape_markdown("Reservations created on startup:\n" + "\n".join(lines), version=2)
         else:
             return
         await self._send_message(message, image)

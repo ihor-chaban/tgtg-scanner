@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from queue import Queue
 
 from tgtg_scanner.models import Config, Cron, Favorites, Item, Reservations
-from tgtg_scanner.models.reservations import Reservation
+from tgtg_scanner.models.reservations import Reservation, StartupReservations
 
 log = logging.getLogger("tgtg")
 
@@ -20,7 +20,7 @@ class Notifier(ABC):
         self.favorites = favorites
         self.cron = Cron()
         self.thread = threading.Thread(target=self._run)
-        self.queue: Queue[Item | Reservation | None] = Queue()
+        self.queue: Queue[Item | Reservation | StartupReservations | None] = Queue()
 
     @property
     def name(self):
@@ -36,7 +36,8 @@ class Notifier(ABC):
                 if item is None:
                     break
                 log.debug("Sending %s Notification", self.name)
-                self._send(item)
+                # StartupReservations is only handled by notifiers that announce reservations (Telegram)
+                self._send(item)  # type: ignore[arg-type]
             except KeyboardInterrupt:
                 pass
             except Exception as exc:
@@ -48,9 +49,9 @@ class Notifier(ABC):
             log.debug("Starting %s Notifier thread", self.name)
             self.thread.start()
 
-    def send(self, item: Item | Reservation) -> None:
+    def send(self, item: Item | Reservation | StartupReservations) -> None:
         """Send notification."""
-        if not isinstance(item, (Item, Reservation)):
+        if not isinstance(item, (Item, Reservation, StartupReservations)):
             log.error("Invalid item type: %s", type(item))
             return
         if self.enabled and self.cron.is_now:
