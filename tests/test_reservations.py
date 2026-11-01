@@ -48,3 +48,25 @@ def test_cancel_all_orders(reservations: Reservations):
     order2 = Order("2", "123", 2, "Test Item 2")
     reservations.active_orders = {order1.id: order1, order2.id: order2}
     reservations.cancel_all_orders()
+
+
+def test_order_now_max_amount(reservations: Reservations):
+    reservations.client.create_order.return_value = {"id": "1"}  # type: ignore[attr-defined]
+    order = reservations.order_now("123", "Test Item", 3)
+    reservations.client.create_order.assert_called_once_with("123", 3)  # type: ignore[attr-defined]
+    assert order == Order("1", "123", 3, "Test Item")
+    assert reservations.active_orders == {"1": order}
+
+
+def test_order_now_lowers_amount_on_failure(reservations: Reservations):
+    reservations.client.create_order.side_effect = [Exception("limit"), Exception("limit"), {"id": "2"}]  # type: ignore[attr-defined]
+    order = reservations.order_now("123", "Test Item", 3)
+    assert order.amount == 1
+    assert [c.args for c in reservations.client.create_order.call_args_list] == [("123", 3), ("123", 2), ("123", 1)]  # type: ignore[attr-defined]
+
+
+def test_order_now_all_attempts_fail(reservations: Reservations):
+    reservations.client.create_order.side_effect = Exception("sold out")  # type: ignore[attr-defined]
+    with pytest.raises(Exception, match="sold out"):
+        reservations.order_now("123", "Test Item", 2)
+    assert reservations.active_orders == {}

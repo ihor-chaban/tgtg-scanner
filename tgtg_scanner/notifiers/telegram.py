@@ -33,7 +33,7 @@ from telegram.warnings import PTBUserWarning
 from tgtg_scanner.errors import MaskConfigurationError, TelegramConfigurationError
 from tgtg_scanner.models import Config, Favorites, Item, Reservations
 from tgtg_scanner.models.favorites import AddFavoriteRequest, RemoveFavoriteRequest
-from tgtg_scanner.models.reservations import Order, Reservation
+from tgtg_scanner.models.reservations import Order, OrderRequest, Reservation
 from tgtg_scanner.notifiers.base import Notifier
 
 log = logging.getLogger("tgtg")
@@ -223,10 +223,22 @@ class Telegram(Notifier):
             log.info("Reactivated Telegram Notifications")
             self.mute = None
         image = None
+        reply_markup = None
         if isinstance(item, Item) and not self.only_reservations and not self.mute:
             message = self._unmask(self.body, item)
             if self.image:
                 image = self._unmask_image(self.image, item)
+            if item.items_available > 0:
+                reply_markup = InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                f"🛒 Reserve {item.items_available}",
+                                callback_data=OrderRequest(item.item_id, item.display_name, item.items_available),
+                            )
+                        ]
+                    ]
+                )
         elif isinstance(item, Reservation):
             message = escape_markdown(
                 (
@@ -238,21 +250,26 @@ class Telegram(Notifier):
             )
         else:
             return
-        await self._send_message(message, image)
+        await self._send_message(message, image, reply_markup)
 
-    async def _send_message(self, message: str, image: bytes | None = None) -> None:
+    async def _send_message(
+        self, message: str, image: bytes | None = None, reply_markup: InlineKeyboardMarkup | None = None
+    ) -> None:
         log.debug("%s message: %s", self.name, message)
         fmt = ParseMode.MARKDOWN_V2
         for chat_id in self.chat_ids:
             try:
                 if image:
-                    await self.application.bot.send_photo(chat_id=chat_id, photo=image, caption=message, parse_mode=fmt)
+                    await self.application.bot.send_photo(
+                        chat_id=chat_id, photo=image, caption=message, parse_mode=fmt, reply_markup=reply_markup
+                    )
                 else:
                     await self.application.bot.send_message(
                         chat_id=chat_id,
                         text=message,
                         parse_mode=fmt,
                         disable_web_page_preview=True,
+                        reply_markup=reply_markup,
                     )
                 self.retries = 0
             except BadRequest as err:
@@ -267,7 +284,7 @@ class Telegram(Notifier):
                 self.retries += 1
                 if self.retries > Telegram.MAX_RETRIES:
                     raise err
-                await self._send_message(message)
+                await self._send_message(message, image, reply_markup)
             except TelegramError as err:
                 log.error("Telegram Error: %s", err)
 
@@ -488,8 +505,33 @@ class Telegram(Notifier):
                 ),
             )
 
+    async def _order_now(self, update: Update, request: OrderRequest) -> None:
+        query = update.callback_query
+        if str(query.message.chat.id) not in self.chat_ids:
+            log.warning("Unauthorized order request from chat id %s", query.message.chat.id)
+            await query.answer()
+            return
+        try:
+            # create_order is a blocking HTTP call and may be retried with lower amounts
+            order = await asyncio.to_thread(
+                self.reservations.order_now, request.item_id, request.display_name, request.max_amount
+            )
+        except Exception as exc:
+            log.warning('Order for "%s" failed: %s', request.display_name, exc)
+            await query.answer(f"Could not reserve {request.display_name}", show_alert=True)
+            return
+        log.info('Ordered %s x "%s"', order.amount, order.display_name)
+        await query.answer(f"Reserved {order.amount} x {order.display_name} for 5 minutes", show_alert=True)
+        try:
+            await query.edit_message_reply_markup(reply_markup=None)
+        except TelegramError as err:
+            log.debug("Telegram Error: %s", err)
+
     async def _callback_query_handler(self, update: Update, _) -> None:
         data = update.callback_query.data
+        if isinstance(data, OrderRequest):
+            await self._order_now(update, data)
+            return
         if isinstance(data, Item):
             self.reservations.reserve(data.item_id, data.display_name)
             await update.callback_query.answer(f"Added {data.display_name} to Reservation queue")

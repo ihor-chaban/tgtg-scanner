@@ -23,6 +23,15 @@ class Reservation:
     display_name: str
 
 
+@dataclass
+class OrderRequest:
+    """Request to order an item immediately, up to the given amount."""
+
+    item_id: str
+    display_name: str
+    max_amount: int
+
+
 class Reservations:
     def __init__(self, client: TgtgClient) -> None:
         self.client = client
@@ -73,6 +82,37 @@ class Reservations:
                     log.warning("Order failed: %s", exc)
             remaining.append(reservation)
         self.reservation_query = remaining
+
+    def order_now(self, item_id: str, display_name: str, max_amount: int) -> Order:
+        """Order an item immediately, as many bags as possible.
+
+        Starts with max_amount and lowers it by one on every failed attempt
+        (e.g. the amount exceeds the per-order limit or the stock changed).
+
+        Args:
+            item_id (str): Item ID
+            display_name (str): Item display name
+            max_amount (int): Highest amount to try
+
+        Raises:
+            Exception: the error of the last attempt if no amount could be ordered
+
+        Returns:
+            Order: the created order, with the amount actually ordered
+
+        """
+        last_exc: Exception | None = None
+        for amount in range(max(max_amount, 1), 0, -1):
+            try:
+                res = self.client.create_order(item_id, amount)
+            except Exception as exc:
+                log.debug("Order of %s x %s failed: %s", amount, display_name, exc)
+                last_exc = exc
+                continue
+            order = Order(res.get("id"), item_id, amount, display_name)
+            self.active_orders[order.id] = order
+            return order
+        raise last_exc or RuntimeError(f"Could not order {display_name}")
 
     def update_active_orders(self) -> None:
         """Remove orders that are not active anymore."""

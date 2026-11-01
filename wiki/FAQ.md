@@ -73,6 +73,16 @@ If there are fewer available bags than you have in your queue it will reserve al
 The reservation will remain active with the remaining bags that haven't been reserved yet.
 If the order fails (e.g. sold out), the reservation amount will remain the same.
 
+### Reserve button on notifications
+
+When a notification reports available Magic Bags, it carries a "Reserve N" button, where N is the amount available.
+Clicking it immediately orders all N bags, without waiting for the next scan.
+If Too Good To Go rejects the order (e.g. the store limits the bags per customer or the stock changed),
+the bot retries with one bag less until an order succeeds.
+The order is held for 5 minutes and can be cancelled with `/orders` or `/cancelallorders`.
+After a successful order the button is removed from the message.
+Only the chats listed in `ChatIDs` can use the button.
+
 **Important!**
 Certain stores may have a maximum limit on bags per customer.
 Please ensure that the desired quantity for reservation from this store is allowed first.

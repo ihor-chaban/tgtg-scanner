@@ -1,13 +1,15 @@
+import asyncio
 import json
 import platform
 from time import sleep
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import responses
 from pytest_mock.plugin import MockerFixture
 
 from tgtg_scanner.models import Config, Cron, Favorites, Item, Reservations
+from tgtg_scanner.models.reservations import Order, OrderRequest
 from tgtg_scanner.notifiers.apprise import Apprise
 from tgtg_scanner.notifiers.console import Console
 from tgtg_scanner.notifiers.discord import Discord
@@ -366,3 +368,44 @@ def test_discord(test_item: Item, reservations: Reservations, favorites: Favorit
     discord.send(test_item)
     sleep(0.5)
     discord.stop()
+
+
+def _telegram_for_orders(reservations: Reservations, favorites: Favorites) -> Telegram:
+    config = Config()
+    config.telegram.enabled = False
+    config.telegram.chat_ids = ["123456"]
+    telegram = Telegram(config, reservations, favorites)
+    telegram.chat_ids = ["123456"]
+    return telegram
+
+
+def _callback_update(chat_id: str) -> MagicMock:
+    update = MagicMock()
+    update.callback_query.message.chat.id = chat_id
+    update.callback_query.answer = AsyncMock()
+    update.callback_query.edit_message_reply_markup = AsyncMock()
+    return update
+
+
+def test_telegram_order_button_orders_max_amount(reservations: Reservations, favorites: Favorites):
+    telegram = _telegram_for_orders(reservations, favorites)
+    reservations.order_now.return_value = Order("1", "123", 3, "Test Item")  # type: ignore[attr-defined]
+    update = _callback_update("123456")
+    asyncio.run(telegram._order_now(update, OrderRequest("123", "Test Item", 3)))
+    reservations.order_now.assert_called_once_with("123", "Test Item", 3)  # type: ignore[attr-defined]
+    update.callback_query.edit_message_reply_markup.assert_awaited_once_with(reply_markup=None)
+
+
+def test_telegram_order_button_rejects_unknown_chat(reservations: Reservations, favorites: Favorites):
+    telegram = _telegram_for_orders(reservations, favorites)
+    update = _callback_update("999")
+    asyncio.run(telegram._order_now(update, OrderRequest("123", "Test Item", 3)))
+    reservations.order_now.assert_not_called()  # type: ignore[attr-defined]
+
+
+def test_telegram_order_button_failure(reservations: Reservations, favorites: Favorites):
+    telegram = _telegram_for_orders(reservations, favorites)
+    reservations.order_now.side_effect = Exception("sold out")  # type: ignore[attr-defined]
+    update = _callback_update("123456")
+    asyncio.run(telegram._order_now(update, OrderRequest("123", "Test Item", 3)))
+    update.callback_query.edit_message_reply_markup.assert_not_awaited()
